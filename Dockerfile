@@ -6,7 +6,7 @@ RUN rm -rf /usr/share/nginx/html/*
 
 # Copy files to app
 
-COPY . /usr/share/nginx/html/
+COPY dist/ /usr/share/nginx/html/
 
 
 #Expose Port
