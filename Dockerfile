@@ -10,7 +10,7 @@ WORKDIR /app
 
 # Copy files to app
 
-COPY . /usr/share/nginx/html/*
+COPY . /usr/share/nginx/html/
 
 #Run the package
 
