@@ -38,7 +38,7 @@ pipeline {
                 ${scannerHome}/bin/sonar-scanner \
                 -Dsonar.projectKey=brain-task \
                 -Dsonar.projectName=brain-task \
-                -Dsonar.sources=dist
+                -Dsonar.sources=. \
                 """
             }
         }
