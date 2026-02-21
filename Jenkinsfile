@@ -38,7 +38,8 @@ pipeline {
         }
 
         /* ================= QUALITY GATE ================= */
-        /* stage('Quality Gate') {
+        /* 
+        stage('Quality Gate') {
             agent {
                 docker {
                     image 'sonarsource/sonarcloud-quality-gate'
@@ -49,7 +50,8 @@ pipeline {
                     waitForQualityGate abortPipeline: true
                 }
             }
-        }*/
+        }
+        */
 
         /* ================= DOCKER BUILD ================= */
         stage('Docker Build') {
