@@ -34,7 +34,7 @@ pipeline {
                     withSonarQubeEnv('sonarqube') {
                         sh """
                         ${scannerHome}/bin/sonar-scanner \
-                          -Dsonar.projectKey= brain-task\
+                          -Dsonar.projectKey= brain-task \
                           -Dsonar.projectName=brain-task \
                           -Dsonar.sources=dist 
                         """
