@@ -1,0 +1,109 @@
+pipeline {
+    agent none
+
+    
+
+    environment {
+        DOCKERHUB_USER = "lakshmanan1996"
+        GIT_REPO = "https://github.com/Lakshmanan1996/Brain-Tasks-App.git"
+        SERVICE_NAME = "brain-task"
+        IMAGE_NAME = "brain-task"
+    }
+
+    stages {
+
+        /* ===================== CHECKOUT ===================== */
+        stage('Checkout Code') {
+            agent {label 'workernode1'}
+            steps {
+                cleanWs()
+                git branch: 'main', url: env.GIT_REPO
+
+                stash name: 'source',
+                      includes: '**/*',
+                      excludes: '**/.git/**,**/target/**'
+            }
+        }
+
+        /* ===================== SONARQUBE ===================== */
+        stage('SonarQube Analysis') {
+            agent {label 'workernode1'}
+            steps {
+                script {
+                    def scannerHome = tool 'SonarQubeScanner'
+                    withSonarQubeEnv('sonarqube') {
+                        sh """
+                        ${scannerHome}/bin/sonar-scanner \
+                          -Dsonar.projectKey= brain-task\
+                          -Dsonar.projectName=brain-task \
+                          -Dsonar.sources=dist 
+                        """
+                    }
+                }
+            }
+        }
+
+        /* ===================== QUALITY GATE ===================== */
+        stage('Quality Gate') {
+            agent {label 'workernode1'}
+            steps {
+                timeout(time: 2, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: false
+                }
+            }
+        }
+
+        /* ===================== DOCKER BUILD ===================== */
+        stage('Docker Build') {
+            agent {label 'workernode1'}
+            steps {
+                unstash 'source'
+                sh '''
+                  docker build -t ${DOCKERHUB_USER}/${IMAGE_NAME}:${BUILD_NUMBER} .
+                  docker tag ${DOCKERHUB_USER}/${IMAGE_NAME}:${BUILD_NUMBER} \
+                             ${DOCKERHUB_USER}/${IMAGE_NAME}:latest
+                '''
+            }
+        }
+
+        /* ===================== TRIVY ===================== */
+        stage('Trivy Scan') {
+            agent {label 'workernode1'}
+            steps {
+                sh '''
+                  trivy image --exit-code 0 --severity HIGH,CRITICAL \
+                    ${DOCKERHUB_USER}/${IMAGE_NAME}:${BUILD_NUMBER}
+                '''
+                echo "✅ Trivy scan completed."
+            }
+        }
+
+        /* ===================== PUSH TO DOCKER HUB ===================== */
+        stage('Push Image') {
+            agent {label 'workernode1'}
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-creds',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+                }
+
+                sh '''
+                  docker push ${DOCKERHUB_USER}/${IMAGE_NAME}:${BUILD_NUMBER}
+                  docker push ${DOCKERHUB_USER}/${IMAGE_NAME}:latest
+                '''
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "✅ Internet Banking CI Pipeline SUCCESS"
+        }
+        failure {
+            echo "❌ Internet Banking CI Pipeline FAILED"
+        }
+    }
+}
