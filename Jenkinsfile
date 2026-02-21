@@ -102,10 +102,10 @@ pipeline {
 
     post {
         success {
-            echo "✅ Internet Banking CI Pipeline SUCCESS"
+            echo "✅ Brain-Tasks-App CI Pipeline SUCCESS"
         }
         failure {
-            echo "❌ Internet Banking CI Pipeline FAILED"
+            echo "❌ Brain-Tasks-App CI Pipeline FAILED"
         }
     }
 }
