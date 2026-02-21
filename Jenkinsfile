@@ -28,14 +28,16 @@ pipeline {
         /* ===================== SONARQUBE ===================== */
         stage('SonarQube Analysis') {
             agent {label 'workernode1'}
+            
             steps {
                 script {
                     def scannerHome = tool 'SonarQubeScanner'
+                    
                     withSonarQubeEnv('sonarqube') {
                         sh """
-                        ${scannerHome}/bin/sonar-scanner 
-                          -Dsonar.projectKey= brain-task 
-                          -Dsonar.projectName=brain-task 
+                        ${scannerHome}/bin/sonar-scanner \ 
+                          -Dsonar.projectKey= brain-task \
+                          -Dsonar.projectName= brain-task \
                           -Dsonar.sources=dist 
                         """
                     }
