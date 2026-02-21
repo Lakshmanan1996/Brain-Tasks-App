@@ -33,9 +33,9 @@ pipeline {
                     def scannerHome = tool 'SonarQubeScanner'
                     withSonarQubeEnv('sonarqube') {
                         sh """
-                        ${scannerHome}/bin/sonar-scanner \
-                          -Dsonar.projectKey= brain-task \
-                          -Dsonar.projectName=brain-task \
+                        ${scannerHome}/bin/sonar-scanner 
+                          -Dsonar.projectKey= brain-task 
+                          -Dsonar.projectName=brain-task 
                           -Dsonar.sources=dist 
                         """
                     }
